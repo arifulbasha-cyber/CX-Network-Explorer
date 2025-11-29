@@ -1,5 +1,5 @@
 {
-  "name": "CX Network Explorer",
-  "description": "Pure Android-style network file manager with MX Player playlist integration.",
+  "name": "CX Native Explorer (Kotlin)",
+  "description": "Source code generator for Native Android CX-style Explorer with MX Player integration.",
   "requestFramePermissions": []
 }
