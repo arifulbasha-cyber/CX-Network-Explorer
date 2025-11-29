@@ -20,8 +20,7 @@ const App: React.FC = () => {
         <div>
           <h2 className="font-bold text-lg">CI Build Configured</h2>
           <p className="text-sm opacity-90">
-             I have added <code>.github/workflows/build.yml</code> and updated <code>build.gradle</code>.
-             Follow the "Secrets Setup" guide below to enable signed APK builds.
+             I have configured <code>.github/workflows/build.yml</code> to build a <strong>Signed Release APK</strong>.
           </p>
         </div>
       </div>
@@ -30,7 +29,7 @@ const App: React.FC = () => {
         {/* Simple File Explorer for the Generated Files */}
         <div className="w-64 bg-[#252526] border-r border-[#333] flex flex-col pt-4">
           <div className="px-4 pb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">CI / CD</div>
-          <FileItem name="Secrets Setup" active={activeTab === 'ci-guide'} onClick={() => setActiveTab('ci-guide')} icon="🔑" />
+          <FileItem name="Secrets Guide" active={activeTab === 'ci-guide'} onClick={() => setActiveTab('ci-guide')} icon="🔑" />
           <FileItem name="build.yml" active={activeTab === 'workflow'} onClick={() => setActiveTab('workflow')} icon="⚙️" />
           
           <div className="mt-4 px-4 pb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Android Source</div>
@@ -43,49 +42,84 @@ const App: React.FC = () => {
         {/* Preview Area */}
         <div className="flex-1 bg-[#1e1e1e] p-8 overflow-auto">
            {activeTab === 'ci-guide' ? (
-             <div className="max-w-3xl mx-auto space-y-6">
-                <h1 className="text-3xl font-bold text-white mb-4">How to Sign your APK on GitHub</h1>
+             <div className="max-w-3xl mx-auto space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-white mb-2">Build Setup Guide</h1>
+                    <p className="text-gray-400">Follow these steps to enable automatic APK building on GitHub.</p>
+                </div>
                 
-                <div className="bg-yellow-900/30 border border-yellow-700 p-4 rounded-lg">
-                  <h3 className="text-yellow-500 font-bold mb-2">⚠️ Important</h3>
-                  <p className="text-sm">GitHub Actions cannot sign your app without your permission. You must generate a "Keystore" file and upload it as a Secret.</p>
+                {/* STEP 1 */}
+                <div className="bg-[#2d2d30] p-6 rounded-xl border border-gray-700">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">1</div>
+                        <h2 className="text-xl font-semibold text-white">Generate Signing Key</h2>
+                    </div>
+                    <div className="ml-11 space-y-4">
+                        <p className="text-sm">You need the <strong>Java Development Kit (JDK)</strong> installed on your computer to use the <code>keytool</code> command.</p>
+                        
+                        <div className="bg-black/30 p-3 rounded text-sm border border-gray-600">
+                             <strong className="text-gray-400 block mb-1">Check if you have it:</strong>
+                             <code className="text-green-400">java -version</code>
+                             <p className="mt-1 text-gray-500">If command not found, download <a href="https://adoptium.net/" target="_blank" className="text-blue-400 underline">OpenJDK here</a>.</p>
+                        </div>
+
+                        <p className="text-sm">Open your Terminal (Mac/Linux) or Command Prompt (Windows) and run this to create the file:</p>
+                        <div className="bg-black p-4 rounded-lg overflow-x-auto border border-gray-700">
+                            <code className="text-green-400 whitespace-pre">keytool -genkey -v -keystore release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias</code>
+                        </div>
+                        <p className="text-xs text-gray-500 italic">It will ask for a password. Remember this password!</p>
+                    </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="border-l-4 border-blue-500 pl-4">
-                    <h3 className="text-xl font-semibold text-white">Step 1: Generate Keystore</h3>
-                    <p className="mb-2">Run this command in your computer's terminal (Mac/Linux/Windows PowerShell):</p>
-                    <pre className="bg-black p-3 rounded font-mono text-sm select-all">
-keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-key-alias
-                    </pre>
-                    <p className="mt-2 text-sm italic">Set a password you will remember. For "First and Last name", etc., you can enter anything.</p>
-                  </div>
-
-                  <div className="border-l-4 border-blue-500 pl-4">
-                    <h3 className="text-xl font-semibold text-white">Step 2: Base64 Encode it</h3>
-                    <p className="mb-2">GitHub Secrets are text-only, so we convert the file to text:</p>
-                    <p className="text-xs font-mono mb-1 text-gray-400">Mac/Linux:</p>
-                    <pre className="bg-black p-3 rounded font-mono text-sm select-all">base64 my-release-key.jks > keystore_base64.txt</pre>
-                    <p className="text-xs font-mono mt-2 mb-1 text-gray-400">Windows (PowerShell):</p>
-                    <pre className="bg-black p-3 rounded font-mono text-sm select-all">[Convert]::ToBase64String([IO.File]::ReadAllBytes("./my-release-key.jks")) | Out-File -Encoding ascii keystore_base64.txt</pre>
-                  </div>
-
-                  <div className="border-l-4 border-blue-500 pl-4">
-                    <h3 className="text-xl font-semibold text-white">Step 3: Add to GitHub</h3>
-                    <p>Go to your Repo: <strong>Settings &gt; Secrets and variables &gt; Actions &gt; New repository secret</strong></p>
-                    <p className="mt-2">Add these 4 secrets:</p>
-                    <ul className="list-disc ml-5 mt-2 space-y-2 text-gray-300">
-                      <li><strong className="text-white">KEYSTORE_BASE64</strong>: (Paste the content of keystore_base64.txt)</li>
-                      <li><strong className="text-white">KEYSTORE_PASSWORD</strong>: (The password you set in Step 1)</li>
-                      <li><strong className="text-white">KEY_ALIAS</strong>: <code>my-key-alias</code> (or whatever you named it)</li>
-                      <li><strong className="text-white">KEY_PASSWORD</strong>: (The password you set in Step 1)</li>
-                    </ul>
-                  </div>
+                {/* STEP 2 */}
+                <div className="bg-[#2d2d30] p-6 rounded-xl border border-gray-700">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">2</div>
+                        <h2 className="text-xl font-semibold text-white">Convert to Base64</h2>
+                    </div>
+                    <div className="ml-11 space-y-4">
+                        <p className="text-sm">GitHub secrets cannot store files, so we convert the file to text.</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase mb-2">Mac / Linux</p>
+                                <div className="bg-black p-3 rounded border border-gray-700">
+                                    <code className="text-green-400 text-xs break-all">base64 release.jks &gt; release.base64.txt</code>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase mb-2">Windows (PowerShell)</p>
+                                <div className="bg-black p-3 rounded border border-gray-700">
+                                    <code className="text-green-400 text-xs break-all">[Convert]::ToBase64String([IO.File]::ReadAllBytes("./release.jks")) | Out-File -Encoding ascii release.base64.txt</code>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-sm">Open the resulting text file and copy the <strong>entire</strong> long string.</p>
+                    </div>
                 </div>
+
+                {/* STEP 3 */}
+                <div className="bg-[#2d2d30] p-6 rounded-xl border border-gray-700">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">3</div>
+                        <h2 className="text-xl font-semibold text-white">Add Secrets to GitHub</h2>
+                    </div>
+                    <div className="ml-11">
+                        <p className="text-sm mb-4">Go to Repo <strong>Settings</strong> &gt; <strong>Secrets and variables</strong> &gt; <strong>Actions</strong> &gt; <strong>New repository secret</strong>.</p>
+                        
+                        <div className="space-y-3">
+                            <SecretRow name="ANDROID_KEYSTORE_BASE64" desc="The long text string from Step 2" />
+                            <SecretRow name="ANDROID_KEYSTORE_PASSWORD" desc="The password you created in Step 1" />
+                            <SecretRow name="ANDROID_KEY_ALIAS" desc="The alias name (e.g., 'my-alias')" />
+                            <SecretRow name="ANDROID_KEY_PASSWORD" desc="Same as store password (usually)" />
+                        </div>
+                    </div>
+                </div>
+
              </div>
            ) : (
              <div className="flex items-center justify-center h-full text-gray-500">
-               <p>Select "Secrets Setup" to see instructions, or view files on the left.</p>
+               <p>Select "Secrets Guide" for instructions.</p>
              </div>
            )}
         </div>
@@ -93,6 +127,13 @@ keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -valid
     </div>
   );
 };
+
+const SecretRow = ({ name, desc }: { name: string, desc: string }) => (
+    <div className="flex flex-col sm:flex-row sm:items-center bg-black/20 p-3 rounded border border-gray-700/50">
+        <code className="text-green-400 font-bold text-sm sm:w-1/2 break-all">{name}</code>
+        <span className="text-gray-400 text-xs sm:text-sm sm:w-1/2 mt-1 sm:mt-0">{desc}</span>
+    </div>
+);
 
 const FileItem = ({ name, active, onClick, icon = "📄", indent = false }: any) => (
   <button
