@@ -1,20 +1,21 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# CX Native Explorer
 
-# Run and deploy your AI Studio app
+A pure Native Android application written in Kotlin that functions as a cloud-based file explorer (CX Explorer style).
 
-This contains everything you need to run your app locally.
+## Features
+- **Cloud Only**: No local storage clutter. Starts directly with Google Drive authentication.
+- **MX Player Integration**: Automatically generates `.m3u8` playlists from folders so "Next/Previous" buttons work in MX Player.
+- **Native Performance**: Built with Kotlin and Coroutines.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1FhJKNd2nGF3NhZODd2ct1uqntKzQcL97
+## How to Build
+1. Clone this repository.
+2. Open Android Studio.
+3. Select **Open an existing Android Studio project**.
+4. Navigate to and select the `android` folder from this repository.
+5. Let Gradle sync.
+6. Run on your device/emulator.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Setup
+You need to add your Google Cloud Console credentials:
+1. Go to `android/app/src/main/res/values/strings.xml` (create if missing).
+2. Add your OAuth Client ID (or configure via Firebase/Google Services json if preferred).
