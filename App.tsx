@@ -45,6 +45,15 @@ const App: React.FC = () => {
     }
   }, [currentPath]);
 
+  // AUTO-LOGIN PROMPT: If we are at root and have NO files, user needs to login.
+  useEffect(() => {
+    if (!loading && files.length === 0 && currentPath === 'root') {
+      // Small delay to let the UI render first
+      const timer = setTimeout(() => setShowAddModal(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [files.length, currentPath, loading]);
+
   // Toast Timer
   useEffect(() => {
     if (toastMsg) {
@@ -73,7 +82,8 @@ const App: React.FC = () => {
     const targetIndex = videos.findIndex(v => v.id === targetFile.id);
     if (targetIndex === -1) return '';
 
-    // Create a reordered list starting from the target
+    // Create a reordered list starting from the target so the player plays it first
+    // then continues to the next ones in the loop.
     const ordered = [
       ...videos.slice(targetIndex),
       ...videos.slice(0, targetIndex)
@@ -217,21 +227,21 @@ const App: React.FC = () => {
           ) : (
             <div className="space-y-1">
               
-              {/* Add New Connection Button (Only visible at root) */}
+              {/* Add New Connection Button (Visible at root) */}
               {currentPath === 'root' && (
                 <div 
-                  className="group flex items-center p-3 rounded-xl active:bg-slate-800 transition-colors cursor-pointer border-2 border-dashed border-slate-700 hover:border-slate-500 mb-2"
+                  className="group flex items-center p-3 rounded-xl active:bg-slate-800 transition-colors cursor-pointer border border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-800/50 mb-4 shadow-sm"
                   onClick={() => setShowAddModal(true)}
                 >
                   <div className="flex flex-1 items-center min-w-0">
-                    <div className="shrink-0 mr-4 relative text-green-500">
+                    <div className="shrink-0 mr-4 relative bg-slate-800 p-2 rounded-full border border-slate-700 group-hover:border-blue-500 group-active:scale-95 transition-all">
                        <PlusIcon />
                     </div>
                     <div className="flex-1 min-w-0 pr-4">
-                      <p className="font-medium text-base truncate text-slate-300 group-active:text-green-400 transition-colors">
-                        New Location
+                      <p className="font-bold text-base truncate text-slate-200 group-hover:text-blue-400 transition-colors">
+                        Add Cloud Storage
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">Remote, Cloud, SMB</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Google Drive, Dropbox, OneDrive</p>
                     </div>
                   </div>
                 </div>
@@ -240,7 +250,7 @@ const App: React.FC = () => {
               {files.map(file => (
                 <div 
                   key={file.id}
-                  className="group flex items-center p-2 rounded-xl active:bg-slate-800 transition-colors cursor-default"
+                  className="group flex items-center p-2 rounded-xl active:bg-slate-800 transition-colors cursor-default border border-transparent hover:border-slate-800"
                 >
                   {/* Icon Area - Click to Navigate/Play */}
                   <div 
@@ -249,18 +259,18 @@ const App: React.FC = () => {
                   >
                     <div className="shrink-0 mr-4 relative">
                       {file.type === FileType.FOLDER ? (
-                        <div className="text-yellow-500 drop-shadow-lg">
+                        <div className="text-yellow-500 drop-shadow-lg transform group-active:scale-95 transition-transform">
                            <FolderIcon />
                         </div>
                       ) : (
-                         <div className="relative">
+                         <div className="relative transform group-active:scale-95 transition-transform">
                             <div className="text-blue-500 drop-shadow-md">
                               <VideoIcon />
                             </div>
                             {/* Play overlay for video */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                               <div className="bg-black/20 rounded-full p-1">
-                                 <svg className="w-4 h-4 text-white/90" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                               <div className="bg-black/30 rounded-full p-1.5 backdrop-blur-sm">
+                                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                </div>
                             </div>
                          </div>
@@ -268,26 +278,26 @@ const App: React.FC = () => {
                     </div>
                     
                     <div className="flex-1 min-w-0 pr-4">
-                      <p className="font-medium text-base truncate text-slate-200 group-active:text-blue-400 transition-colors">
+                      <p className="font-medium text-base truncate text-slate-200 group-active:text-blue-400 transition-colors leading-snug">
                         {file.name}
                       </p>
                       
                       {/* Special Rendering for Drives (Root Items with Usage) */}
                       {currentPath === 'root' && file.usagePct !== undefined ? (
-                        <div className="mt-1">
+                        <div className="mt-2">
                            <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
                               <div 
-                                className={`h-full rounded-full ${file.usagePct > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
+                                className={`h-full rounded-full shadow-lg ${file.usagePct > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
                                 style={{ width: `${file.usagePct}%` }}
                               ></div>
                            </div>
                            <div className="flex justify-between mt-1">
-                             <span className="text-[10px] text-slate-400">{file.storageUsed} used</span>
-                             <span className="text-[10px] text-slate-500">Total {file.storageTotal}</span>
+                             <span className="text-[10px] text-slate-400 font-mono">{file.storageUsed} used</span>
+                             <span className="text-[10px] text-slate-500 font-mono">Total {file.storageTotal}</span>
                            </div>
                         </div>
                       ) : (
-                        <div className="flex items-center space-x-2 mt-0.5">
+                        <div className="flex items-center space-x-2 mt-1">
                           <span className="text-xs text-slate-500">{file.date}</span>
                           {file.size && (
                             <>
@@ -314,9 +324,13 @@ const App: React.FC = () => {
               ))}
 
               {files.length === 0 && currentPath === 'root' && (
-                 <div className="text-center p-8 opacity-50">
-                    <p>No drives connected.</p>
-                    <p className="text-sm">Tap "New Location" to start.</p>
+                 <div className="flex flex-col items-center justify-center p-8 mt-10 opacity-70">
+                    <div className="animate-bounce mb-4 text-blue-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-400">Tap above to connect Drive</p>
                  </div>
               )}
 
@@ -361,7 +375,7 @@ const App: React.FC = () => {
                      const fileToPlay = f || { id: item.fileId, name: item.fileName, type: FileType.VIDEO, parentId: null, url: '...' };
                      if (f) launchMxPlayer(f);
                   }}
-                  className="p-4 border-b border-slate-800 active:bg-slate-800"
+                  className="p-4 border-b border-slate-800 active:bg-slate-800 cursor-pointer hover:bg-slate-800/50"
                 >
                   <div className="flex items-start space-x-3">
                      <div className="mt-1 shrink-0 text-blue-500">
