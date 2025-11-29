@@ -102,12 +102,13 @@ const App: React.FC = () => {
     // 3. Construct Intent
     let intentUrl = '';
     
-    if (dataUri.length < 50000) { 
+    // Check length limit approximately (Android intents have limits around 100kb-500kb usually, play safe)
+    if (dataUri.length < 100000) { 
        // Try Playlist Intent
        const title = encodeURIComponent(file.name);
        intentUrl = `intent:${dataUri}#Intent;package=com.mxtech.videoplayer.ad;type=audio/x-mpegurl;S.title=${title};end`;
     } else {
-       // Fallback to single file
+       // Fallback to single file if playlist is too huge
        const title = encodeURIComponent(file.name);
        intentUrl = `intent:${file.url}#Intent;package=com.mxtech.videoplayer.ad;type=video/*;S.title=${title};end`;
     }
@@ -311,6 +312,13 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ))}
+
+              {files.length === 0 && currentPath === 'root' && (
+                 <div className="text-center p-8 opacity-50">
+                    <p>No drives connected.</p>
+                    <p className="text-sm">Tap "New Location" to start.</p>
+                 </div>
+              )}
 
               {files.length === 0 && currentPath !== 'root' && (
                 <div className="flex flex-col items-center justify-center pt-32 text-slate-600">

@@ -2,52 +2,14 @@ import { FileData, FileType } from '../types';
 
 // Store files in a let variable so we can modify them at runtime (simulate mounting drives)
 let mockFiles: FileData[] = [
-  // Root Level - Initially just one local server
+  // Root Level - Initially EMPTY (Pure Cloud App)
   { id: 'root', name: 'Network', type: FileType.FOLDER, parentId: null },
-  
-  // Existing SMB Server (Simulating a local NAS that is always there)
-  { 
-    id: 'smb-1', 
-    name: 'Local NAS (SMB)', 
-    type: FileType.FOLDER, 
-    parentId: 'root', 
-    size: '4TB', 
-    date: 'Online',
-    storageTotal: '4 TB',
-    storageUsed: '2.8 TB',
-    usagePct: 70
-  },
-  
-  // Inside SMB
-  { id: 'smb-movies', name: 'Movies', type: FileType.FOLDER, parentId: 'smb-1', date: '2023-10-20' },
-  { id: 'smb-shows', name: 'TV Shows', type: FileType.FOLDER, parentId: 'smb-1', date: '2023-10-22' },
-  
-  // SMB Content
-  { 
-    id: 'mov-1', 
-    name: '01_Big_Buck_Bunny.mp4', 
-    type: FileType.VIDEO, 
-    parentId: 'smb-movies', 
-    size: '150MB', 
-    date: '2008-05-20',
-    url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumbnail: 'https://picsum.photos/200/120?random=1'
-  },
-  { 
-    id: 'mov-2', 
-    name: '02_Elephant_Dreams.mp4', 
-    type: FileType.VIDEO, 
-    parentId: 'smb-movies', 
-    size: '120MB', 
-    date: '2006-03-24',
-    url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    thumbnail: 'https://picsum.photos/200/120?random=2'
-  },
 ];
 
 // Templates for Cloud Drives (to be injected when user "Logs in")
 const cloudDriveTemplates: Record<string, FileData[]> = {
   'gdrive': [
+    // Root of Google Drive
     { 
       id: 'gd-root', 
       name: 'Google Drive', 
@@ -55,14 +17,73 @@ const cloudDriveTemplates: Record<string, FileData[]> = {
       parentId: 'root', 
       size: '15GB', 
       date: 'Synced',
-      storageTotal: '15 GB',
-      storageUsed: '12.4 GB',
-      usagePct: 82 
+      storageTotal: '100 GB',
+      storageUsed: '45 GB',
+      usagePct: 45 
     },
-    { id: 'gd-docs', name: 'My Documents', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-11-01' },
-    { id: 'gd-photos', name: 'Vacation Photos', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-09-15' },
-    { id: 'gd-vid-1', name: 'Project_Alpha_Demo.mp4', type: FileType.VIDEO, parentId: 'gd-root', size: '50MB', date: '2023-11-01', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
-    { id: 'gd-vid-2', name: 'Meeting_Recording_Oct.mp4', type: FileType.VIDEO, parentId: 'gd-root', size: '200MB', date: '2023-10-05', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
+    
+    // Folders
+    { id: 'gd-movies', name: 'Movies', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-11-10' },
+    { id: 'gd-tv', name: 'TV Shows', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-11-12' },
+    { id: 'gd-docs', name: 'Documents', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-10-05' },
+
+    // MOVIE CONTENT (For Playlist Testing)
+    { 
+      id: 'mov-1', 
+      name: 'Big Buck Bunny.mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-movies', 
+      size: '150MB', 
+      date: '2023-11-01', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' 
+    },
+    { 
+      id: 'mov-2', 
+      name: 'Elephant Dreams.mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-movies', 
+      size: '120MB', 
+      date: '2023-11-02', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' 
+    },
+    { 
+      id: 'mov-3', 
+      name: 'Sintel (4K).mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-movies', 
+      size: '210MB', 
+      date: '2023-11-03', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' 
+    },
+    { 
+      id: 'mov-4', 
+      name: 'Tears of Steel.mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-movies', 
+      size: '180MB', 
+      date: '2023-11-04', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' 
+    },
+
+    // TV SHOW CONTENT
+    { 
+      id: 'tv-1', 
+      name: 'Review_S01E01.mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-tv', 
+      size: '450MB', 
+      date: '2023-12-01', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4' 
+    },
+    { 
+      id: 'tv-2', 
+      name: 'Joyrides_S01E02.mp4', 
+      type: FileType.VIDEO, 
+      parentId: 'gd-tv', 
+      size: '120MB', 
+      date: '2023-12-02', 
+      url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' 
+    },
   ],
   'dropbox': [
     { 

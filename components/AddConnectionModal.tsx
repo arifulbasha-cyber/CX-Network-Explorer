@@ -56,9 +56,12 @@ const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ onClose, onConn
             <div className="grid grid-cols-2 gap-2 p-2">
                <button 
                   onClick={() => handleConnect('gdrive', 'Google Drive')}
-                  className="flex flex-col items-center justify-center p-6 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition border border-gray-600/30 hover:border-gray-500"
+                  className="relative flex flex-col items-center justify-center p-6 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition border border-gray-600/30 hover:border-blue-500/50 group"
                >
-                  <div className="mb-3"><GoogleDriveIcon /></div>
+                  <div className="absolute top-2 right-2 bg-blue-600 text-[10px] font-bold px-1.5 py-0.5 rounded text-white shadow-sm">
+                    RECOMMENDED
+                  </div>
+                  <div className="mb-3 transform group-hover:scale-110 transition-transform"><GoogleDriveIcon /></div>
                   <span className="text-sm font-medium text-gray-200">Google Drive</span>
                </button>
 
