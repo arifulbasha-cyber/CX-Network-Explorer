@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
   
   // Modal States
   const [infoFile, setInfoFile] = useState<FileData | null>(null);
@@ -44,6 +45,14 @@ const App: React.FC = () => {
     }
   }, [currentPath]);
 
+  // Toast Timer
+  useEffect(() => {
+    if (toastMsg) {
+      const timer = setTimeout(() => setToastMsg(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMsg]);
+
   const loadFiles = async (pathId: string) => {
     setLoading(true);
     const data = await getFiles(pathId);
@@ -54,6 +63,7 @@ const App: React.FC = () => {
   const handleConnectDrive = async (type: 'gdrive' | 'dropbox' | 'onedrive') => {
     await mountCloudDrive(type);
     loadFiles('root');
+    setToastMsg("Drive connected successfully");
   };
 
   const generateM3uPlaylist = (targetFile: FileData, allFiles: FileData[]): string => {
@@ -209,7 +219,7 @@ const App: React.FC = () => {
               {/* Add New Connection Button (Only visible at root) */}
               {currentPath === 'root' && (
                 <div 
-                  className="group flex items-center p-2 rounded-xl active:bg-slate-800 transition-colors cursor-pointer border-2 border-dashed border-slate-700 hover:border-slate-500 mb-2"
+                  className="group flex items-center p-3 rounded-xl active:bg-slate-800 transition-colors cursor-pointer border-2 border-dashed border-slate-700 hover:border-slate-500 mb-2"
                   onClick={() => setShowAddModal(true)}
                 >
                   <div className="flex flex-1 items-center min-w-0">
@@ -260,15 +270,32 @@ const App: React.FC = () => {
                       <p className="font-medium text-base truncate text-slate-200 group-active:text-blue-400 transition-colors">
                         {file.name}
                       </p>
-                      <div className="flex items-center space-x-2 mt-0.5">
-                        <span className="text-xs text-slate-500">{file.date}</span>
-                        {file.size && (
-                          <>
-                            <span className="w-1 h-1 bg-slate-600 rounded-full"></span>
-                            <span className="text-xs text-slate-500">{file.size}</span>
-                          </>
-                        )}
-                      </div>
+                      
+                      {/* Special Rendering for Drives (Root Items with Usage) */}
+                      {currentPath === 'root' && file.usagePct !== undefined ? (
+                        <div className="mt-1">
+                           <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full ${file.usagePct > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
+                                style={{ width: `${file.usagePct}%` }}
+                              ></div>
+                           </div>
+                           <div className="flex justify-between mt-1">
+                             <span className="text-[10px] text-slate-400">{file.storageUsed} used</span>
+                             <span className="text-[10px] text-slate-500">Total {file.storageTotal}</span>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2 mt-0.5">
+                          <span className="text-xs text-slate-500">{file.date}</span>
+                          {file.size && (
+                            <>
+                              <span className="w-1 h-1 bg-slate-600 rounded-full"></span>
+                              <span className="text-xs text-slate-500">{file.size}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -361,6 +388,14 @@ const App: React.FC = () => {
             onClose={() => setShowAddModal(false)}
             onConnect={handleConnectDrive}
          />
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full shadow-lg border border-slate-700 animate-fade-in z-50 flex items-center space-x-2">
+           <span className="text-green-400">✓</span>
+           <span className="text-sm">{toastMsg}</span>
+        </div>
       )}
     </div>
   );

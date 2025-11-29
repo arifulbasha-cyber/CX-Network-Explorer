@@ -8,14 +8,30 @@ interface AddConnectionModalProps {
 
 const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ onClose, onConnect }) => {
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
+  const [statusText, setStatusText] = useState<string>("Connecting...");
 
   const handleConnect = (type: 'gdrive' | 'dropbox' | 'onedrive', name: string) => {
     setConnectingTo(name);
-    // Simulate OAuth Delay
+    
+    // Simulate realistic OAuth steps
+    setStatusText("Contacting server...");
+    
+    setTimeout(() => {
+      setStatusText("Verifying credentials...");
+    }, 700);
+
+    setTimeout(() => {
+      setStatusText("Requesting permissions...");
+    }, 1500);
+
+    setTimeout(() => {
+      setStatusText("Finalizing connection...");
+    }, 2200);
+
     setTimeout(() => {
       onConnect(type);
       onClose();
-    }, 1500);
+    }, 2800);
   };
 
   return (
@@ -33,8 +49,8 @@ const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ onClose, onConn
           {connectingTo ? (
              <div className="flex flex-col items-center justify-center py-12 space-y-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                <p className="text-gray-300">Connecting to {connectingTo}...</p>
-                <p className="text-xs text-gray-500">Please wait while we authenticate</p>
+                <p className="text-gray-200 font-medium">{connectingTo}</p>
+                <p className="text-sm text-gray-400 animate-pulse">{statusText}</p>
              </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 p-2">

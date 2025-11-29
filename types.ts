@@ -14,6 +14,10 @@ export interface FileData {
   url?: string; // For network files
   parentId: string | null;
   thumbnail?: string;
+  // Storage usage for Drives (Root level items)
+  storageTotal?: string;
+  storageUsed?: string;
+  usagePct?: number; 
 }
 
 export interface HistoryItem {

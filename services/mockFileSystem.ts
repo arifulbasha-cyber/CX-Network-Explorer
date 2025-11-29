@@ -6,7 +6,17 @@ let mockFiles: FileData[] = [
   { id: 'root', name: 'Network', type: FileType.FOLDER, parentId: null },
   
   // Existing SMB Server (Simulating a local NAS that is always there)
-  { id: 'smb-1', name: 'Local NAS (SMB)', type: FileType.FOLDER, parentId: 'root', size: '4TB', date: 'Online' },
+  { 
+    id: 'smb-1', 
+    name: 'Local NAS (SMB)', 
+    type: FileType.FOLDER, 
+    parentId: 'root', 
+    size: '4TB', 
+    date: 'Online',
+    storageTotal: '4 TB',
+    storageUsed: '2.8 TB',
+    usagePct: 70
+  },
   
   // Inside SMB
   { id: 'smb-movies', name: 'Movies', type: FileType.FOLDER, parentId: 'smb-1', date: '2023-10-20' },
@@ -38,19 +48,49 @@ let mockFiles: FileData[] = [
 // Templates for Cloud Drives (to be injected when user "Logs in")
 const cloudDriveTemplates: Record<string, FileData[]> = {
   'gdrive': [
-    { id: 'gd-root', name: 'Google Drive', type: FileType.FOLDER, parentId: 'root', size: '15GB', date: 'Synced' },
+    { 
+      id: 'gd-root', 
+      name: 'Google Drive', 
+      type: FileType.FOLDER, 
+      parentId: 'root', 
+      size: '15GB', 
+      date: 'Synced',
+      storageTotal: '15 GB',
+      storageUsed: '12.4 GB',
+      usagePct: 82 
+    },
     { id: 'gd-docs', name: 'My Documents', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-11-01' },
     { id: 'gd-photos', name: 'Vacation Photos', type: FileType.FOLDER, parentId: 'gd-root', date: '2023-09-15' },
     { id: 'gd-vid-1', name: 'Project_Alpha_Demo.mp4', type: FileType.VIDEO, parentId: 'gd-root', size: '50MB', date: '2023-11-01', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
     { id: 'gd-vid-2', name: 'Meeting_Recording_Oct.mp4', type: FileType.VIDEO, parentId: 'gd-root', size: '200MB', date: '2023-10-05', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
   ],
   'dropbox': [
-    { id: 'db-root', name: 'Dropbox', type: FileType.FOLDER, parentId: 'root', size: '2TB', date: 'Synced' },
+    { 
+      id: 'db-root', 
+      name: 'Dropbox', 
+      type: FileType.FOLDER, 
+      parentId: 'root', 
+      size: '2TB', 
+      date: 'Synced',
+      storageTotal: '2 TB',
+      storageUsed: '450 GB',
+      usagePct: 22 
+    },
     { id: 'db-work', name: 'Work Share', type: FileType.FOLDER, parentId: 'db-root', date: '2023-12-01' },
     { id: 'db-vid-1', name: 'Design_Review.mp4', type: FileType.VIDEO, parentId: 'db-work', size: '450MB', date: '2023-12-02', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4' },
   ],
   'onedrive': [
-    { id: 'od-root', name: 'OneDrive', type: FileType.FOLDER, parentId: 'root', size: '1TB', date: 'Synced' },
+    { 
+      id: 'od-root', 
+      name: 'OneDrive', 
+      type: FileType.FOLDER, 
+      parentId: 'root', 
+      size: '1TB', 
+      date: 'Synced',
+      storageTotal: '1 TB',
+      storageUsed: '890 GB',
+      usagePct: 89 
+    },
     { id: 'od-backup', name: 'PC Backup', type: FileType.FOLDER, parentId: 'od-root', date: '2023-12-01' },
     { id: 'od-vid-1', name: 'Family_Video.mp4', type: FileType.VIDEO, parentId: 'od-root', size: '120MB', date: '2023-12-10', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
   ]
@@ -96,7 +136,7 @@ export const mountCloudDrive = (serviceType: 'gdrive' | 'dropbox' | 'onedrive'):
         }
       }
       resolve();
-    }, 1000); // Simulate network handshake
+    }, 1500); // Simulate network handshake
   });
 };
 
