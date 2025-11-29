@@ -3,7 +3,7 @@ import {
   getFiles, 
   getBreadcrumbs, 
   getFileById, 
-  getSiblings 
+  mountCloudDrive
 } from './services/mockFileSystem';
 import { FileData, FileType, HistoryItem } from './types';
 import { 
@@ -12,9 +12,10 @@ import {
   ServerIcon, 
   BackIcon, 
   HistoryIcon,
-  PlayIcon
+  PlusIcon
 } from './components/Icons';
 import FilePropertiesModal from './components/PlayerModal';
+import AddConnectionModal from './components/AddConnectionModal';
 
 // Styles for the Info button
 const InfoIcon = () => (
@@ -30,8 +31,9 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   
-  // Selection logic
+  // Modal States
   const [infoFile, setInfoFile] = useState<FileData | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   
   // Load initial data
   useEffect(() => {
@@ -49,15 +51,15 @@ const App: React.FC = () => {
     setLoading(false);
   };
 
+  const handleConnectDrive = async (type: 'gdrive' | 'dropbox' | 'onedrive') => {
+    await mountCloudDrive(type);
+    loadFiles('root');
+  };
+
   const generateM3uPlaylist = (targetFile: FileData, allFiles: FileData[]): string => {
     const videos = allFiles.filter(f => f.type === FileType.VIDEO);
     
-    // Sort videos to ensure correct order, though usually they come sorted from FS
-    // We want the target file to be played first, but users expect "Next" to go to the next file in the list
-    // MX Player usually takes the list and plays the one you point to.
-    // Since we are generating a dynamic playlist, we can put the target file first
-    // followed by the rest of the list in order, cycling around.
-    
+    // Sort videos to ensure correct order
     const targetIndex = videos.findIndex(v => v.id === targetFile.id);
     if (targetIndex === -1) return '';
 
@@ -84,18 +86,12 @@ const App: React.FC = () => {
     const m3uContent = generateM3uPlaylist(file, files);
     
     // 2. Create Data URI for the playlist
-    // We use base64 encoding to pass the playlist content
     const base64Playlist = btoa(unescape(encodeURIComponent(m3uContent)));
     const dataUri = `data:audio/x-mpegurl;base64,${base64Playlist}`;
 
     // 3. Construct Intent
-    // We pass the Data URI as the data for the intent. 
-    // MX Player is robust and can often read the playlist from the data stream.
-    // If the playlist is too long for an Intent URI, we fallback to single file.
-    
     let intentUrl = '';
     
-    // Safety check for URL length (approx 2000 chars is safe limit for some browsers/webviews)
     if (dataUri.length < 50000) { 
        // Try Playlist Intent
        const title = encodeURIComponent(file.name);
@@ -209,6 +205,27 @@ const App: React.FC = () => {
              </div>
           ) : (
             <div className="space-y-1">
+              
+              {/* Add New Connection Button (Only visible at root) */}
+              {currentPath === 'root' && (
+                <div 
+                  className="group flex items-center p-2 rounded-xl active:bg-slate-800 transition-colors cursor-pointer border-2 border-dashed border-slate-700 hover:border-slate-500 mb-2"
+                  onClick={() => setShowAddModal(true)}
+                >
+                  <div className="flex flex-1 items-center min-w-0">
+                    <div className="shrink-0 mr-4 relative text-green-500">
+                       <PlusIcon />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="font-medium text-base truncate text-slate-300 group-active:text-green-400 transition-colors">
+                        New Location
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">Remote, Cloud, SMB</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {files.map(file => (
                 <div 
                   key={file.id}
@@ -268,7 +285,7 @@ const App: React.FC = () => {
                 </div>
               ))}
 
-              {files.length === 0 && (
+              {files.length === 0 && currentPath !== 'root' && (
                 <div className="flex flex-col items-center justify-center pt-32 text-slate-600">
                   <div className="w-16 h-16 border-2 border-slate-700 border-dashed rounded-2xl flex items-center justify-center mb-4">
                     <span className="text-2xl">?</span>
@@ -336,6 +353,14 @@ const App: React.FC = () => {
           file={infoFile}
           onClose={() => setInfoFile(null)}
         />
+      )}
+
+      {/* Add Connection Modal */}
+      {showAddModal && (
+         <AddConnectionModal 
+            onClose={() => setShowAddModal(false)}
+            onConnect={handleConnectDrive}
+         />
       )}
     </div>
   );
